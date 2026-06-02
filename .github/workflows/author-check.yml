@@ -1,0 +1,65 @@
+name: author-check
+# Server-side enforcement of WExIQ commit-author identity. Machine-independent: runs no
+# matter where (or by whom) commits were made. Mirror of dev-infra/identity/allowed-authors.txt.
+on:
+  pull_request:
+  push:
+    branches: ["**"]
+permissions:
+  contents: read
+jobs:
+  author-allowlist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate commit author emails
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_AFTER: ${{ github.sha }}
+          REF: ${{ github.ref }}
+        run: |
+          set -u
+          # Canonical allowlist — mirror of dev-infra/identity/allowed-authors.txt
+          ALLOW=" william@wexiq.ai edith@wexiq.ai ops@wexiq.ai 290021864+W-WExIQ@users.noreply.github.com 285237661+E-WExIQ@users.noreply.github.com 273475913+wexiq-ai@users.noreply.github.com "
+          BOT=" ops@wexiq.ai 273475913+wexiq-ai@users.noreply.github.com "
+          ZERO="0000000000000000000000000000000000000000"
+
+          if [ -n "${PR_HEAD:-}" ]; then
+            RANGE="$PR_BASE..$PR_HEAD"
+          elif [ -n "${PUSH_BEFORE:-}" ] && [ "$PUSH_BEFORE" != "$ZERO" ]; then
+            RANGE="$PUSH_BEFORE..$PUSH_AFTER"
+          else
+            RANGE="$PUSH_AFTER"   # new branch / first push — validate the tip
+          fi
+          echo "Validating commit authors in: $RANGE"
+
+          if echo "$RANGE" | grep -q '\.\.'; then
+            emails="$(git log --format='%ae' "$RANGE" 2>/dev/null)"
+          else
+            emails="$(git log -1 --format='%ae' "$RANGE" 2>/dev/null)"
+          fi
+
+          fail=0
+          while IFS= read -r e; do
+            [ -z "$e" ] && continue
+            case "$ALLOW" in
+              *" $e "*) echo "  ok  <$e>" ;;
+              *) echo "::error::Disallowed commit author <$e> — not a WExIQ identity (William/Edie/bot)."; fail=1 ;;
+            esac
+          done <<< "$emails"
+
+          # bot-owns-main: the tip of main must be bot-authored (mirrors the Vercel gate)
+          if [ "${REF:-}" = "refs/heads/main" ]; then
+            tip="$(git log -1 --format='%ae' "$PUSH_AFTER" 2>/dev/null)"
+            case "$BOT" in
+              *" $tip "*) echo "  main tip is bot-authored <$tip>" ;;
+              *) echo "::error::main tip authored by <$tip>, not the bot (ops@wexiq.ai). main is bot-owned; Vercel will block this deploy."; fail=1 ;;
+            esac
+          fi
+
+          if [ "$fail" -eq 0 ]; then echo "✔ all commit authors are valid WExIQ identities"; fi
+          exit "$fail"
