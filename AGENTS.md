@@ -21,3 +21,11 @@ Required settings for cross-project sessions:
 
 Canonical routines (hooks, slash commands, agents) live in each repo's own `.claude/` directory. Each WExIQai repo is self-contained: none of them point at any other as canon. Cross-trio development plumbing (the macOS LaunchAgent that keeps local clones fresh, plus the cross-trio session-kickoff explainer) lives in `WExIQai/dev-infra`.
 <!-- END:wexiqai-environment-setup -->
+
+# Git identity & Vercel deploys (cross-repo)
+
+Canonical: `WExIQai/dev-infra` → README "Identity & deployment enforcement".
+
+- **Agents (Claude Code / Cowork / scheduled) commit as the bot** `wexiq-ai` <ops@wexiq.ai>. In a fresh shell: `source <dev-infra>/identity/wexiq-identity.sh && as-bot` (a dev machine's default git author may be a human, so don't skip it). Cloud sessions: set `GH_TOKEN` (a wexiq-ai PAT) + `GIT_AUTHOR_*`/`GIT_COMMITTER_*` = ops@wexiq.ai.
+- **`main` is bot-owned.** Humans author on branches/PRs; merge to main *as the bot* with `gh pr merge <N> --merge`. The org ruleset `main-bot-owned` requires PRs for humans; the Vercel team BLOCKS any deploy whose commit author isn't a Vercel member (ops@/edith@). A human-authored commit on `main` won't deploy.
+- Per machine, run `dev-infra/bootstrap.sh` once.
