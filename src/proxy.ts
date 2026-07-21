@@ -1,7 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export function middleware(request: NextRequest) {
+// Canonical on-disk casing for every top-level route (the folder names under
+// src/app). App Router paths are case-sensitive, so we redirect any casing of a
+// known route to this exact spelling — e.g. /bg, /Bg, /bG all resolve to /BG.
+// Add new routes here when you create them under src/app.
+const CANONICAL_ROUTES = [
+  "BG",
+  "CalendarPrototype",
+  "EscapeFromParis",
+  "GmailCleaner",
+  "LeadStarLeaders",
+  "QuestForRetirement",
+  "TheLaundromatTrail",
+  "amerilife-marketing-strategy",
+  "ca47media",
+  "example",
+];
+
+const CANONICAL_BY_SEGMENT = new Map(
+  CANONICAL_ROUTES.map((route) => [route.toLowerCase(), route]),
+);
+
+// Routes behind the password gate, keyed by their lowercased first segment.
+const PROTECTED_SEGMENTS = new Set([
+  "amerilife-marketing-strategy",
+  "ca47media",
+  "calendarprototype",
+  "gmailcleaner",
+  "leadstarleaders",
+]);
+
+export function proxy(request: NextRequest) {
   const pagePath = request.nextUrl.pathname;
+  const segments = pagePath.split("/"); // e.g. "/bg" -> ["", "bg"]
+  const firstSegment = segments[1] ?? "";
+  const canonicalSegment = CANONICAL_BY_SEGMENT.get(firstSegment.toLowerCase());
+
+  // Case-insensitive routing: redirect mixed-case URLs to the canonical casing.
+  if (canonicalSegment && canonicalSegment !== firstSegment) {
+    segments[1] = canonicalSegment;
+    const url = request.nextUrl.clone();
+    url.pathname = segments.join("/");
+    return NextResponse.redirect(url, 308);
+  }
+
+  // Everything except the protected routes passes straight through.
+  if (!canonicalSegment || !PROTECTED_SEGMENTS.has(canonicalSegment.toLowerCase())) {
+    return NextResponse.next();
+  }
+
   // Normalize to lowercase so mixed-case routes (e.g. /CalendarPrototype)
   // generate the same cookie key that the login route sets.
   const normalizedPath = pagePath.toLowerCase();
@@ -13,11 +60,6 @@ export function middleware(request: NextRequest) {
   const isLegacyPage = normalizedPath === "/amerilife-marketing-strategy";
 
   if (auth === "authenticated" || (isLegacyPage && legacyAuth === "authenticated")) {
-    return NextResponse.next();
-  }
-
-  // Allow the login API route through
-  if (normalizedPath === "/api/login") {
     return NextResponse.next();
   }
 
@@ -33,7 +75,9 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/amerilife-marketing-strategy", "/ca47media", "/CalendarPrototype", "/GmailCleaner", "/LeadStarLeaders"],
+  // Run on all page routes so case-insensitive redirects work everywhere,
+  // while skipping API routes, Next internals, and any file with an extension.
+  matcher: ["/((?!api|_next/static|_next/image|.*\\.).*)"],
 };
 
 function leadStarLoginHTML(pagePath: string) {
