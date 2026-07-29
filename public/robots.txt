@@ -1,0 +1,18 @@
+User-agent: *
+Disallow: /Meridian
+Disallow: /meridian
+
+# User-initiated AI assistant fetchers (a person pasting a URL into their
+# assistant) may read the briefing. These are fetch-on-request agents, not
+# crawlers: training bots (ClaudeBot, GPTBot) and search-index bots stay under
+# the * rule above, and the X-Robots-Tag noindex header still applies.
+# Kept in parity with wexiq.ai/robots.txt (added there 2026-07-27 after the
+# client's assistant was blocked by the blanket disallow).
+User-agent: Claude-User
+Disallow:
+
+User-agent: ChatGPT-User
+Disallow:
+
+User-agent: Perplexity-User
+Disallow:
