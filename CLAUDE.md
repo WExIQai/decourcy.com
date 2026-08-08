@@ -51,3 +51,13 @@ Most content will be workflow and process visualizations. Follow these rules:
 - Pages should feel technical and modern, not decorative
 - Consistent spacing and alignment across all workflow elements
 - Automatically update this style guide when new patterns are established during iteration
+
+## Retro Game / Terminal Pages
+
+Interactive game pages (e.g. `/EscapeFromParis`, `/Zork`) use a CRT terminal treatment layered on the site palette:
+
+- **Panel**: near-black green `#040e07` on the `#071a0e` page background
+- **Game text**: phosphor green `#33ff33`, monospace (`font-mono`), soft glow (`text-shadow: 0 0 6px rgba(51,255,51,0.25)`)
+- **Player input / echoes**: light blue accent `#5b9bd5`
+- **Scanlines**: full-screen `repeating-linear-gradient` overlay, `pointer-events-none`
+- **Mobile terminal layout**: fixed-height flex column (status bar / scrollable transcript / input bar); track `window.visualViewport` height so the input bar stays above the on-screen keyboard (plus `interactiveWidget: "resizes-content"` in the viewport export); input font ≥16px to prevent iOS focus zoom; `autoCapitalize`/`autoCorrect`/`spellCheck` off for command inputs; one-tap quick-command chips for common verbs
