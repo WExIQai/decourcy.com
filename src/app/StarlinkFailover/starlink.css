@@ -126,53 +126,18 @@
   animation: sf-flicker 2.6s linear infinite;
 }
 
-/* ── Range slider (state slider + timeline scrubber) ── */
-.sf-range {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 44px; /* generous touch target */
-  background: transparent;
-  cursor: pointer;
-  margin: 0;
-  touch-action: pan-y;
+/* Time-in-state bar under the active state card. */
+@keyframes sf-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
 }
-.sf-range:focus {
-  outline: none;
-}
-.sf-range::-webkit-slider-runnable-track {
-  height: 44px;
-  background: transparent;
-}
-.sf-range::-moz-range-track {
-  height: 44px;
-  background: transparent;
-}
-.sf-range::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 30px;
-  height: 30px;
-  margin-top: 7px;
-  border-radius: 9999px;
-  background: #071a0e;
-  border: 2px solid #5b9bd5;
-  box-shadow: 0 0 0 4px rgba(91, 155, 213, 0.18), 0 0 18px rgba(91, 155, 213, 0.45);
-  transition: box-shadow 0.2s ease;
-}
-.sf-range::-moz-range-thumb {
-  width: 26px;
-  height: 26px;
-  border-radius: 9999px;
-  background: #071a0e;
-  border: 2px solid #5b9bd5;
-  box-shadow: 0 0 0 4px rgba(91, 155, 213, 0.18), 0 0 18px rgba(91, 155, 213, 0.45);
-}
-.sf-range:focus-visible::-webkit-slider-thumb {
-  box-shadow: 0 0 0 6px rgba(91, 155, 213, 0.35), 0 0 22px rgba(91, 155, 213, 0.6);
-}
-.sf-range:focus-visible::-moz-range-thumb {
-  box-shadow: 0 0 0 6px rgba(91, 155, 213, 0.35), 0 0 22px rgba(91, 155, 213, 0.6);
+.sf-progress {
+  width: 0%;
+  animation: sf-progress linear forwards;
 }
 
 /* Faint scan-grid behind the house diagram. */
@@ -195,6 +160,10 @@
   .sf-pulse-red,
   .sf-flicker {
     animation: none;
+  }
+  .sf-progress {
+    animation: none;
+    width: 100%;
   }
   .sf-ring {
     opacity: 0;

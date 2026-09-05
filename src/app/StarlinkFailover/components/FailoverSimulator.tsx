@@ -1,215 +1,198 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { HouseDiagram } from "./HouseDiagram";
-import { PlayGlyph } from "./Glyphs";
 
 const BLUE = "#5b9bd5";
+const SKY = "#a8d4ff";
 const RED = "#e0605a";
+
+/* Timing of the automatic loop. */
+const HOLD_MS = 5200; // time spent in each state
+const FADE_MS = 1500; // cross-fade between states
+const CYCLE_MS = 2 * (HOLD_MS + FADE_MS);
 
 function easeInOut(x: number) {
   return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 }
 
 /**
- * The state slider + live status readout + house diagram.
- * `t` is continuous while dragging and snaps (animated) to 0 or 1 on release.
+ * Non-interactive: the house cycles Normal → Backup → Normal on its own.
+ * Both states are named on screen; the current one is highlighted.
+ * The loop only runs while the diagram is on screen.
  */
 export function FailoverSimulator() {
   const [t, setT] = useState(0);
-  const [dragging, setDragging] = useState(false);
-  const [drill, setDrill] = useState(false);
-  const raf = useRef<number | null>(null);
-  const timers = useRef<number[]>([]);
+  const [backup, setBackup] = useState(false);
+  const [cycle, setCycle] = useState(0); // increments on every state change; restarts the progress bar
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(false);
+  const elapsedRef = useRef(0); // position inside the cycle, kept across pauses
   const tRef = useRef(0);
+  const backupRef = useRef(false);
 
-  // Single writer for `t`: keeps the ref (read inside animations) in sync
-  // without touching it during render.
-  const update = useCallback((v: number) => {
-    tRef.current = v;
-    setT(v);
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => setActive(e.isIntersecting), { threshold: 0.15 });
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
 
-  const cancelAnim = useCallback(() => {
-    if (raf.current !== null) cancelAnimationFrame(raf.current);
-    raf.current = null;
-  }, []);
+  useEffect(() => {
+    if (!active) return;
+    let raf = 0;
+    const origin = performance.now() - elapsedRef.current;
+    const tick = (now: number) => {
+      const e = (now - origin) % CYCLE_MS;
+      elapsedRef.current = e;
+      let next: number;
+      if (e < HOLD_MS) next = 0;
+      else if (e < HOLD_MS + FADE_MS) next = easeInOut((e - HOLD_MS) / FADE_MS);
+      else if (e < 2 * HOLD_MS + FADE_MS) next = 1;
+      else next = 1 - easeInOut((e - 2 * HOLD_MS - FADE_MS) / FADE_MS);
 
-  const animateTo = useCallback(
-    (target: number, ms = 600) =>
-      new Promise<void>((resolve) => {
-        cancelAnim();
-        const from = tRef.current;
-        const start = performance.now();
-        const step = (now: number) => {
-          const k = Math.min(1, (now - start) / ms);
-          const v = from + (target - from) * easeInOut(k);
-          update(v);
-          if (k < 1) raf.current = requestAnimationFrame(step);
-          else {
-            raf.current = null;
-            resolve();
-          }
-        };
-        raf.current = requestAnimationFrame(step);
-      }),
-    [cancelAnim, update],
-  );
-
-  const clearTimers = () => {
-    timers.current.forEach((id) => window.clearTimeout(id));
-    timers.current = [];
-  };
-
-  useEffect(() => () => {
-    cancelAnim();
-    clearTimers();
-  }, [cancelAnim]);
-
-  const snap = () => {
-    setDragging(false);
-    void animateTo(tRef.current >= 0.5 ? 1 : 0, 350);
-  };
-
-  const runDrill = async () => {
-    if (drill) return;
-    setDrill(true);
-    clearTimers();
-    await animateTo(0, 300);
-    await new Promise<void>((r) => timers.current.push(window.setTimeout(r, 400)));
-    await animateTo(1, 1400);
-    await new Promise<void>((r) => timers.current.push(window.setTimeout(r, 3600)));
-    await animateTo(0, 1400);
-    setDrill(false);
-  };
-
-  const backup = t >= 0.5;
-  const pct = Math.round(t * 100);
+      if (next !== tRef.current) {
+        tRef.current = next;
+        setT(next);
+      }
+      const isBackup = next >= 0.5;
+      if (isBackup !== backupRef.current) {
+        backupRef.current = isBackup;
+        setBackup(isBackup);
+        setCycle((c) => c + 1);
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [active]);
 
   return (
-    <div className="w-full grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-6 lg:gap-8 items-start">
-      {/* ── Diagram ── */}
-      <div className="w-full rounded-md border border-[#1a4a2e] bg-[#071a0e] sf-grid overflow-hidden">
-        <div className="flex items-center justify-between px-4 pt-3">
-          <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/40">The house</span>
-          <span
-            className="text-[10px] font-bold uppercase tracking-[0.22em] transition-colors"
-            style={{ color: backup ? "#a8d4ff" : BLUE }}
-          >
-            {backup ? "Backup operation" : "Normal operation"}
-          </span>
-        </div>
-        <HouseDiagram t={t} />
+    <div ref={rootRef} className="w-full flex flex-col gap-4">
+      {/* ── The two states, both always named ── */}
+      <div className="grid grid-cols-2 gap-3" role="group" aria-label="Operating state">
+        <StateCard
+          active={!backup}
+          color={BLUE}
+          title="Normal"
+          line="Internet from the wired connection"
+          cycleKey={cycle}
+        />
+        <StateCard
+          active={backup}
+          color={SKY}
+          title="Backup"
+          line="Internet from Starlink"
+          cycleKey={cycle}
+        />
       </div>
 
-      {/* ── Controls + readout ── */}
-      <div className="w-full flex flex-col gap-4">
-        {/* Slider */}
-        <div className="rounded-md border border-[#1a4a2e] bg-[#0d2b18] p-4">
-          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.2em] mb-1">
-            <button
-              type="button"
-              onClick={() => void animateTo(0)}
-              className={`py-1 transition-colors ${!backup ? "text-white" : "text-white/40 hover:text-white/70"}`}
+      <div className="w-full grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-4 lg:gap-6 items-start">
+        {/* ── Diagram ── */}
+        <div className="w-full rounded-md border border-[#1a4a2e] bg-[#071a0e] sf-grid overflow-hidden">
+          <div className="flex items-center justify-between px-4 pt-3">
+            <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/40">The house</span>
+            <span
+              className="text-[10px] font-bold uppercase tracking-[0.22em] transition-colors"
+              style={{ color: backup ? SKY : BLUE }}
             >
-              Normal
-            </button>
-            <span className="text-white/25 tracking-[0.1em]">drag</span>
-            <button
-              type="button"
-              onClick={() => void animateTo(1)}
-              className={`py-1 transition-colors ${backup ? "text-[#a8d4ff]" : "text-white/40 hover:text-white/70"}`}
-            >
-              Backup
-            </button>
+              {backup ? "Backup operation" : "Normal operation"}
+            </span>
           </div>
-
-          <div className="relative h-11">
-            {/* track */}
-            <div className="absolute left-[15px] right-[15px] top-1/2 -translate-y-1/2 h-1.5 rounded-full bg-[#071a0e] border border-[#1a4a2e]" />
-            <div
-              className="absolute left-[15px] top-1/2 -translate-y-1/2 h-1.5 rounded-full"
-              style={{
-                width: `calc(${pct}% - ${(pct / 100) * 30}px)`,
-                background: `linear-gradient(90deg, ${BLUE}, #a8d4ff)`,
-                boxShadow: "0 0 12px rgba(91,155,213,0.5)",
-              }}
-            />
-            {/* end ticks */}
-            <div className="absolute left-[15px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#5b9bd5]" />
-            <div className="absolute right-[15px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#a8d4ff]/70" />
-            <input
-              type="range"
-              min={0}
-              max={100}
-              step={1}
-              value={pct}
-              aria-label="Operating state: slide left for normal, right for backup"
-              aria-valuetext={backup ? "Backup operation" : "Normal operation"}
-              className="sf-range absolute inset-0"
-              onPointerDown={() => {
-                cancelAnim();
-                setDragging(true);
-              }}
-              onChange={(e) => {
-                cancelAnim();
-                update(Number(e.target.value) / 100);
-              }}
-              onPointerUp={snap}
-              onPointerCancel={snap}
-              onBlur={() => dragging && snap()}
-              onKeyUp={(e) => {
-                if (["ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"].includes(e.key)) snap();
-              }}
-            />
-          </div>
-
-          <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.18em] text-white/35">
-            <span>Wired</span>
-            <span>Starlink</span>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => void runDrill()}
-            disabled={drill}
-            className="mt-4 w-full flex items-center justify-center gap-2 rounded border border-[#5b9bd5]/40 bg-[#071a0e] px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.2em] text-[#5b9bd5] hover:border-[#5b9bd5]/80 hover:text-[#a8d4ff] disabled:opacity-50 transition-colors"
-          >
-            <PlayGlyph size={14} />
-            {drill ? "Playing…" : "Play: the wire fails"}
-          </button>
+          <HouseDiagram t={t} />
         </div>
 
-        {/* Status console */}
-        <div className="rounded-md border border-[#1a4a2e] bg-[#0d2b18] p-4 font-mono">
-          <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/40 mb-3 font-sans">Network status</div>
-          <StatusRow
-            label="Wired internet"
-            sub="Main connection"
-            state={backup ? "down" : "up"}
-            text={backup ? "DOWN" : "ONLINE"}
-          />
-          <StatusRow
-            label="Starlink"
-            sub="PerryBackup Wi-Fi"
-            state={backup ? "up-sky" : "idle"}
-            text={backup ? "ON" : "PAUSED"}
-          />
-          <StatusRow label="PerryHome Wi-Fi" sub="Everyday Wi-Fi · Eero" state="up" text="ALL DEVICES CONNECTED" last />
+        {/* ── Status console ── */}
+        <div className="w-full flex flex-col gap-4">
+          <div className="rounded-md border border-[#1a4a2e] bg-[#0d2b18] p-4 font-mono">
+            <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/40 mb-3 font-sans">Network status</div>
+            <StatusRow
+              label="Wired internet"
+              sub="Main connection"
+              state={backup ? "down" : "up"}
+              text={backup ? "DOWN" : "ONLINE"}
+            />
+            <StatusRow
+              label="Starlink"
+              sub="PerryBackup Wi-Fi"
+              state={backup ? "up-sky" : "idle"}
+              text={backup ? "ON" : "PAUSED"}
+            />
+            <StatusRow label="PerryHome Wi-Fi" sub="Everyday Wi-Fi · Eero" state="up" text="ALL DEVICES CONNECTED" last />
 
-          <div className="mt-4 pt-3 border-t border-[#1a4a2e]">
-            <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/35 mb-1.5 font-sans">Internet source</div>
-            <div className="text-[12px] font-bold tracking-[0.14em]" style={{ color: backup ? "#a8d4ff" : BLUE }}>
-              {backup ? "STARLINK (SATELLITE)" : "WIRED (STREET)"}
+            <div className="mt-4 pt-3 border-t border-[#1a4a2e]">
+              <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/35 mb-1.5 font-sans">Internet source</div>
+              <div className="text-[12px] font-bold tracking-[0.14em]" style={{ color: backup ? SKY : BLUE }}>
+                {backup ? "STARLINK (SATELLITE)" : "WIRED (STREET)"}
+              </div>
             </div>
           </div>
-        </div>
 
-        <p className="text-[12px] leading-relaxed text-white/55 px-1">
-          Phones, laptops and TVs stay on the <span className="text-white/85 font-semibold">PerryHome Wi-Fi</span> the
-          whole time. Only the internet source changes.
-        </p>
+          <p className="text-[13px] leading-relaxed text-white/60 px-1">
+            The picture switches between the two states by itself. Phones, laptops and TVs stay on the{" "}
+            <span className="text-white/85 font-semibold">PerryHome Wi-Fi</span> the whole time. Only the
+            internet source changes.
+          </p>
+        </div>
       </div>
+    </div>
+  );
+}
+
+function StateCard({
+  active,
+  color,
+  title,
+  line,
+  cycleKey,
+}: {
+  active: boolean;
+  color: string;
+  title: string;
+  line: string;
+  cycleKey: number;
+}) {
+  return (
+    <div
+      className="relative rounded-md border bg-[#0d2b18] px-4 py-3 overflow-hidden transition-colors duration-500"
+      style={{
+        borderColor: active ? color : "#1a4a2e",
+        boxShadow: active ? `0 0 18px ${color}33` : "none",
+      }}
+      aria-current={active ? "true" : undefined}
+    >
+      <div className="flex items-center gap-2">
+        <span
+          className={`shrink-0 inline-block w-2.5 h-2.5 rounded-full transition-colors duration-500 ${active ? "sf-pulse" : ""}`}
+          style={{
+            background: active ? color : "transparent",
+            border: active ? "none" : "1.5px solid rgba(255,255,255,0.3)",
+          }}
+          aria-hidden
+        />
+        <span
+          className="text-[12px] md:text-sm font-bold uppercase tracking-[0.2em] transition-colors duration-500"
+          style={{ color: active ? "#fff" : "rgba(255,255,255,0.45)" }}
+        >
+          {title}
+        </span>
+      </div>
+      <div
+        className="mt-1 text-[11px] md:text-[12px] leading-snug transition-colors duration-500"
+        style={{ color: active ? color : "rgba(255,255,255,0.35)" }}
+      >
+        {line}
+      </div>
+      {/* time-in-state bar, restarts on every switch */}
+      {active && (
+        <span
+          key={cycleKey}
+          className="absolute left-0 bottom-0 h-[3px] sf-progress"
+          style={{ background: color, animationDuration: `${HOLD_MS + FADE_MS}ms` }}
+          aria-hidden
+        />
+      )}
     </div>
   );
 }
@@ -232,8 +215,8 @@ function StatusRow({
       ? { bg: RED, cls: "sf-pulse-red", ring: "" }
       : state === "idle"
         ? { bg: "transparent", cls: "", ring: `1.5px solid ${BLUE}` }
-        : { bg: state === "up-sky" ? "#a8d4ff" : BLUE, cls: "sf-pulse", ring: "" };
-  const color = state === "down" ? RED : state === "idle" ? "rgba(255,255,255,0.45)" : state === "up-sky" ? "#a8d4ff" : BLUE;
+        : { bg: state === "up-sky" ? SKY : BLUE, cls: "sf-pulse", ring: "" };
+  const color = state === "down" ? RED : state === "idle" ? "rgba(255,255,255,0.45)" : state === "up-sky" ? SKY : BLUE;
 
   return (
     <div className={`flex items-center gap-3 py-2 ${last ? "" : "border-b border-[#1a4a2e]/70"}`}>
