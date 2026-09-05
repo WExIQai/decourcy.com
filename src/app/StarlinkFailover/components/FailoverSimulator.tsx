@@ -91,7 +91,7 @@ export function FailoverSimulator() {
       {/* ── Diagram ── */}
       <div className="w-full rounded-md border border-[#1a4a2e] bg-[#071a0e] sf-grid overflow-hidden">
         <div className="flex items-center justify-between px-4 pt-3">
-          <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/40">Live cross-section</span>
+          <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/40">The house</span>
           <span
             className="text-[10px] font-bold uppercase tracking-[0.22em] transition-colors"
             style={{ color: backup ? "#a8d4ff" : BLUE }}
@@ -144,7 +144,7 @@ export function FailoverSimulator() {
               max={100}
               step={1}
               value={pct}
-              aria-label="Operating state: slide left for normal operation, right for backup operation"
+              aria-label="Operating state: slide left for normal, right for backup"
               aria-valuetext={backup ? "Backup operation" : "Normal operation"}
               className="sf-range absolute inset-0"
               onPointerDown={() => {
@@ -165,7 +165,7 @@ export function FailoverSimulator() {
           </div>
 
           <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.18em] text-white/35">
-            <span>Hardline</span>
+            <span>Wired</span>
             <span>Starlink</span>
           </div>
 
@@ -176,7 +176,7 @@ export function FailoverSimulator() {
             className="mt-4 w-full flex items-center justify-center gap-2 rounded border border-[#5b9bd5]/40 bg-[#071a0e] px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.2em] text-[#5b9bd5] hover:border-[#5b9bd5]/80 hover:text-[#a8d4ff] disabled:opacity-50 transition-colors"
           >
             <PlayGlyph size={14} />
-            {drill ? "Drill running…" : "Run outage drill"}
+            {drill ? "Playing…" : "Play: the wire fails"}
           </button>
         </div>
 
@@ -184,30 +184,30 @@ export function FailoverSimulator() {
         <div className="rounded-md border border-[#1a4a2e] bg-[#0d2b18] p-4 font-mono">
           <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/40 mb-3 font-sans">Network status</div>
           <StatusRow
-            label="Hardline"
-            sub="Primary WAN"
+            label="Wired internet"
+            sub="Main connection"
             state={backup ? "down" : "up"}
-            text={backup ? "OUTAGE" : "ONLINE"}
+            text={backup ? "DOWN" : "ONLINE"}
           />
           <StatusRow
-            label="ScottBackup"
-            sub="Starlink · Backup WAN"
+            label="Starlink"
+            sub="PerryBackup Wi-Fi"
             state={backup ? "up-sky" : "idle"}
-            text={backup ? "ACTIVE" : "STANDBY"}
+            text={backup ? "ON" : "PAUSED"}
           />
-          <StatusRow label="ScottHome" sub="Eero Pro 7 · 4 nodes" state="up" text="ALL DEVICES ONLINE" last />
+          <StatusRow label="PerryHome Wi-Fi" sub="Everyday Wi-Fi · Eero" state="up" text="ALL DEVICES CONNECTED" last />
 
           <div className="mt-4 pt-3 border-t border-[#1a4a2e]">
-            <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/35 mb-1.5 font-sans">Data path</div>
-            <div className="text-[11px] leading-relaxed" style={{ color: backup ? "#a8d4ff" : BLUE }}>
-              {backup ? "SATELLITE → DISH → SCOTTBACKUP →(WI-FI)→ GATEWAY → MESH" : "STREET → MODEM → GATEWAY → MESH"}
+            <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/35 mb-1.5 font-sans">Internet source</div>
+            <div className="text-[12px] font-bold tracking-[0.14em]" style={{ color: backup ? "#a8d4ff" : BLUE }}>
+              {backup ? "STARLINK (SATELLITE)" : "WIRED (STREET)"}
             </div>
           </div>
         </div>
 
         <p className="text-[12px] leading-relaxed text-white/55 px-1">
-          Notice what does <span className="text-white/85 font-semibold">not</span> change: every phone, laptop and TV stays on{" "}
-          <span className="text-white/85 font-semibold">ScottHome</span>. Only the gateway&apos;s upstream swaps.
+          Phones, laptops and TVs stay on the <span className="text-white/85 font-semibold">PerryHome Wi-Fi</span> the
+          whole time. Only the internet source changes.
         </p>
       </div>
     </div>

@@ -84,14 +84,14 @@ export function Arrow({ label }: { label?: string }) {
   );
 }
 
-export function ArrowUp() {
+export function ArrowUp({ label = "Repeat" }: { label?: string }) {
   return (
     <div className="flex flex-col items-center py-1">
       <svg width="12" height="8" viewBox="0 0 12 8" className="text-[#5b9bd5]/60 rotate-180" aria-hidden>
         <path d="M6 8L0 0h12z" fill="currentColor" />
       </svg>
       <div className="w-px h-6 bg-[#5b9bd5]/60" />
-      <span className="text-[10px] text-white/40 mt-1 uppercase font-bold tracking-wider">Re-test</span>
+      <span className="text-[10px] text-white/40 mt-1 uppercase font-bold tracking-wider">{label}</span>
     </div>
   );
 }

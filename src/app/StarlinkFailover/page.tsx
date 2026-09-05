@@ -1,26 +1,27 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { FadeIn } from "@/components/FadeIn";
 import { FailoverSimulator } from "./components/FailoverSimulator";
-import { OutageTimeline } from "./components/OutageTimeline";
-import { EeroBackupToggle, StarlinkServiceToggle } from "./components/AppToggles";
 import { Arrow, ArrowUp, BranchArrows, FlowBox, GroupBox, SectionHeader } from "./components/Flow";
 import {
   BoltGlyph,
   CableGlyph,
   CheckGlyph,
+  CrossGlyph,
   DishGlyph,
   EyeGlyph,
-  HouseGlyph,
+  LinkGlyph,
   MeshNodeGlyph,
   RouterGlyph,
   SatelliteGlyph,
   TagGlyph,
-  ToggleGlyph,
   WifiGlyph,
-  WrenchGlyph,
 } from "./components/Glyphs";
+
+const BLUE = "#5b9bd5";
+const SKY = "#a8d4ff";
+const RED = "#e0605a";
 
 export default function StarlinkFailoverPage() {
   return (
@@ -30,349 +31,317 @@ export default function StarlinkFailoverPage() {
     >
       {/* ── Hero ── */}
       <header className="px-5 pt-14 md:pt-20 pb-10 flex flex-col items-center text-center">
-        <FadeIn className="flex flex-col items-center">
-          <div className="flex items-center justify-center gap-2 text-[10px] md:text-[11px] font-bold uppercase tracking-[0.2em] md:tracking-[0.3em] text-[#5b9bd5]/80">
-            <SatelliteGlyph size={14} className="shrink-0" />
-            <span>Eero Pro 7 · 4 nodes · Starlink standby</span>
-          </div>
-          <h1 className="mt-5 text-3xl md:text-5xl font-bold uppercase tracking-wide text-white/95 leading-none">
+        <FadeIn className="flex flex-col items-center w-full max-w-2xl">
+          <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-wide text-white/95 leading-none">
             Starlink Failover
           </h1>
-          <p className="mt-3 text-[11px] md:text-sm font-bold uppercase tracking-[0.22em] text-white/45">
-            How ScottHome stays online when the wire goes dark
+          <p className="mt-3 text-[11px] md:text-sm font-bold uppercase tracking-[0.22em] text-[#5b9bd5]/90">
+            Backup internet for the house
           </p>
-          <p className="mt-6 max-w-xl text-[13px] md:text-[15px] text-white/65 leading-relaxed">
-            One Wi-Fi name for the whole house. Two ways to reach the internet. The Eero mesh
-            watches the hardline; when it fails, the gateway quietly switches to a Starlink dish on
-            the roof, and switches back when the wire returns. Starlink service itself is turned on
-            only when it is needed.
+          <p className="mt-7 max-w-md text-[17px] md:text-xl text-white/90 leading-snug font-medium">
+            If the wired internet fails, the house switches to Starlink by itself.
+          </p>
+
+          {/* The two Wi-Fi networks */}
+          <div className="mt-8 w-full grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+            <NetworkCard name="PerryHome" kind="Everyday Wi-Fi" color={BLUE}>
+              Every phone, laptop and TV uses it. It never changes.
+            </NetworkCard>
+            <NetworkCard name="PerryBackup" kind="Starlink Wi-Fi" color={SKY}>
+              The backup. The house uses it only while the wire is down.
+            </NetworkCard>
+          </div>
+
+          {/* Two terms */}
+          <div className="mt-4 w-full grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-left text-[13px] md:text-[14px] text-white/65 leading-snug">
+            <Term icon={<MeshNodeGlyph size={16} />} word="Eero">
+              The home Wi-Fi system. Multiple small units, called nodes, work together as one
+              Wi-Fi network that covers the whole house. This is called a mesh network.
+            </Term>
+            <Term icon={<SatelliteGlyph size={16} />} word="Starlink">
+              Satellite internet. A dish on the roof talks to satellites in space. It does not use
+              the wire.
+            </Term>
+          </div>
+
+          <p className="mt-6 max-w-lg text-[12px] md:text-[13px] text-white/45 leading-snug">
+            This is a proven design, modeled on a working installation. Different equipment may need
+            a similar but different setup.
           </p>
         </FadeIn>
       </header>
 
-      <main className="w-full max-w-5xl mx-auto px-4 md:px-6 pb-24 flex flex-col gap-20 md:gap-28">
+      <main className="w-full max-w-5xl mx-auto px-4 md:px-6 pb-24 flex flex-col gap-20 md:gap-24">
         {/* ── Simulator ── */}
         <section aria-labelledby="sim-heading">
           <FadeIn className="w-full">
             <h2 id="sim-heading" className="sr-only">
-              Normal versus backup operation
+              Normal and backup operation
             </h2>
             <FailoverSimulator />
           </FadeIn>
         </section>
 
-        {/* ── Three layers ── */}
+        {/* ── How it works ── */}
         <section>
           <FadeIn className="w-full">
-            <SectionHeader
-              kicker="The idea"
-              title="Three layers, one network name"
-              blurb="Devices join ScottHome and never think about it again. Underneath, the gateway chooses between two upstream connections."
-            />
+            <SectionHeader kicker="In three steps" title="How it works" />
           </FadeIn>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FadeIn className="w-full">
-              <LayerCard
-                icon={<MeshNodeGlyph size={22} />}
-                tag="Layer 1 · What devices see"
-                title="ScottHome"
-                accent="#5b9bd5"
-              >
-                An Eero Pro 7 mesh: four nodes, one Wi-Fi name, whole-house coverage. Phones,
-                laptops and TVs connect here and stay here. They never learn which pipe is feeding
-                the house.
-              </LayerCard>
+              <StepCard n="1" title="Normal" icon={<CableGlyph size={20} />}>
+                Internet comes through the wire. Starlink is paused.
+              </StepCard>
             </FadeIn>
             <FadeIn className="w-full">
-              <LayerCard
-                icon={<CableGlyph size={22} />}
-                tag="Layer 2 · Primary WAN"
-                title="The hardline"
-                accent="#5b9bd5"
-              >
-                Fiber or cable from the street into the modem, then a short Ethernet run to Eero
-                node 1, the gateway. Fast, cheap, and the default almost all of the time.
-              </LayerCard>
+              <StepCard n="2" title="The wire fails" icon={<DishGlyph size={20} />} accent={SKY}>
+                The house switches to Starlink by itself.
+              </StepCard>
             </FadeIn>
             <FadeIn className="w-full">
-              <LayerCard
-                icon={<DishGlyph size={22} />}
-                tag="Layer 3 · Backup WAN"
-                title="ScottBackup"
-                accent="#a8d4ff"
-              >
-                A Starlink dish on the roof, a Starlink router in the utility room, and its own
-                Wi-Fi network: ScottBackup. The gateway joins it only when the hardline fails. The
-                Starlink plan stays paused between outages.
-              </LayerCard>
+              <StepCard n="3" title="The wire is back" icon={<CheckGlyph size={20} />}>
+                The house switches back by itself.
+              </StepCard>
             </FadeIn>
           </div>
         </section>
 
-        {/* ── Timeline ── */}
+        {/* ── What you do ── */}
         <section>
           <FadeIn className="w-full">
-            <SectionHeader
-              kicker="An outage, minute by minute"
-              title="What happens, and who does it"
-              blurb="Almost everything is automatic. The one human step is turning Starlink service on in the Starlink app, because the plan is paused when it is not needed."
-            />
+            <SectionHeader kicker="During an outage" title="One switch" />
           </FadeIn>
-          <FadeIn className="w-full">
-            <OutageTimeline />
-          </FadeIn>
+          <div className="w-full max-w-2xl mx-auto flex flex-col gap-3">
+            <FadeIn className="w-full">
+              <ActionRow state="On" color={SKY}>
+                The internet stops. Open the Starlink app. Turn <b className="text-white">Service</b> on.
+              </ActionRow>
+            </FadeIn>
+            <FadeIn className="w-full">
+              <ActionRow state="Off" color={BLUE}>
+                The Eero app says the wire is back. Turn <b className="text-white">Service</b> off.
+              </ActionRow>
+            </FadeIn>
+            <FadeIn className="w-full">
+              <p className="text-[14px] text-white/70 leading-relaxed px-1 pt-1 text-center">
+                Everything else is automatic.
+              </p>
+            </FadeIn>
+          </div>
         </section>
 
-        {/* ── Owner's playbook ── */}
+        {/* ── Requirements ── */}
         <section>
           <FadeIn className="w-full">
-            <SectionHeader
-              kicker="Owner's playbook"
-              title="When the internet goes out"
-              blurb="Three moves. None of them involve touching a device on ScottHome."
-            />
+            <SectionHeader kicker="What this needs" title="Three things" />
           </FadeIn>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FadeIn className="w-full">
-              <PlayCard n="1" icon={<EyeGlyph size={20} />} title="Check the Eero app">
-                Look for the Internet Backup banner. It should say the network is connected through
-                ScottBackup. If it does not, make sure the Starlink router and dish have power.
-              </PlayCard>
+              <Tile icon={<MeshNodeGlyph size={20} />} title="Eero Plus">
+                A subscription. It includes the automatic switch.
+              </Tile>
             </FadeIn>
             <FadeIn className="w-full">
-              <PlayCard n="2" icon={<ToggleGlyph size={20} />} title="Resume Starlink" accent="#a8d4ff">
-                Open the Starlink app and toggle service on. The dish is already tracking the sky,
-                so the house is at full satellite speed about a minute later.
-              </PlayCard>
+              <Tile icon={<DishGlyph size={20} />} title="Starlink Roam plan">
+                It can be paused and resumed in the app.
+              </Tile>
             </FadeIn>
             <FadeIn className="w-full">
-              <PlayCard n="3" icon={<CheckGlyph size={20} />} title="Carry on. Then pause.">
-                Nothing to change anywhere else. When the Eero app reports the hardline is back, it
-                has already switched home; pause Starlink service again.
-              </PlayCard>
+              <Tile icon={<BoltGlyph size={20} />} title="Low running cost">
+                Starlink is paused between outages. The dish stays powered.
+              </Tile>
             </FadeIn>
           </div>
-
-          <FadeIn className="w-full">
-            <div className="mt-10 text-center text-[10px] font-bold uppercase tracking-[0.24em] text-white/40">
-              The two switches that matter
-            </div>
-          </FadeIn>
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FadeIn className="w-full">
-              <StarlinkServiceToggle />
-            </FadeIn>
-            <FadeIn className="w-full">
-              <EeroBackupToggle />
-            </FadeIn>
-          </div>
-          <FadeIn className="w-full">
-            <p className="mt-4 text-center text-[11px] text-white/40 leading-relaxed max-w-xl mx-auto">
-              Interactive mock-ups, not live controls. Starlink billing and pause terms depend on the
-              plan; Roam-class plans can be paused and resumed from the app.
-            </p>
-          </FadeIn>
         </section>
 
         {/* ── Installer ── */}
-        <section>
+        <section id="installer" className="scroll-mt-8">
           <FadeIn className="w-full">
             <SectionHeader
               kicker="For the installer"
-              title="Installation sequence"
-              blurb="Top to bottom, in order. The Starlink network has to exist before the Eero can be pointed at it, and the failover has to be tested before anyone calls it done."
+              title="Installation steps"
+              blurb="You can skip this section. It is for the person who installs the equipment. These steps match one proven setup: an Eero Pro 7 mesh and a Starlink kit. Different equipment may need a similar but different approach. Do the steps in order. Each step ends with a check."
             />
+            <ShareLink path="/StarlinkFailover#installer" />
           </FadeIn>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+            <FadeIn className="w-full">
+              <ListCard title="Equipment">
+                <li>Starlink kit: dish, cable, router, power supply</li>
+                <li>Mount for the roof type</li>
+                <li>Phone with the Starlink app, signed in to the owner&apos;s Starlink account</li>
+                <li>Phone with the Eero app, signed in to the owner&apos;s Eero account</li>
+                <li>Label maker or marker</li>
+              </ListCard>
+            </FadeIn>
+            <FadeIn className="w-full">
+              <ListCard title="Names used in these steps">
+                <li className="text-white/90">
+                  The Wi-Fi names below are examples. Confirm the real names with the owner before you
+                  start, and use the real names.
+                </li>
+                <li>
+                  <span><Name>PerryHome</Name> is the everyday Wi-Fi network (Eero). It exists. Do not change it.</span>
+                </li>
+                <li>
+                  <span><Name>PerryBackup</Name> is the Starlink Wi-Fi network. You create it in step 4.</span>
+                </li>
+                <li>
+                  <span><Name>Eero gateway</Name> is Eero unit 1, the one connected to the modem.</span>
+                </li>
+                <li>
+                  <span><Name>Utility room</Name> is where the modem and the Eero gateway are.</span>
+                </li>
+              </ListCard>
+            </FadeIn>
+          </div>
 
           <div className="w-full max-w-2xl mx-auto pl-10 md:pl-12 pr-1 flex flex-col items-center">
             <FadeIn className="w-full">
-              <FlowBox step={1} label="Site survey" sublabel="Starlink app · obstruction check" icon={<EyeGlyph size={18} />}>
-                <p>
-                  Stand where the dish will live and run the obstruction check in the Starlink app.
-                  It wants a clear view of the sky; the tree that looks harmless costs you drops
-                  later.
-                </p>
-                <p>
-                  Confirm the cable run from the mount to the utility room where the modem and the
-                  Eero gateway (node 1) live. Stay within the length of the Starlink cable on hand;
-                  longer cables are available from Starlink.
-                </p>
-                <p>
-                  Confirm the Starlink plan can be paused and resumed from the app. Roam-class plans
-                  support this; standard Residential generally does not.
-                </p>
+              <FlowBox step={1} label="Check the sky" sublabel="Starlink app" icon={<EyeGlyph size={18} />}>
+                <Do>Go to the planned dish location.</Do>
+                <Do>In the Starlink app, run <Name>Check for obstructions</Name>.</Do>
+                <Check>The app shows a clear view of the sky. If not, choose another location.</Check>
               </FlowBox>
             </FadeIn>
             <FadeIn className="w-full"><Arrow /></FadeIn>
 
             <FadeIn className="w-full">
-              <FlowBox step={2} label="Mount the dish" sublabel="Roof, mast or ground mount" icon={<DishGlyph size={18} />}>
-                <p>
-                  Use the Starlink mount for the roof type and follow the app&apos;s alignment guidance
-                  for the dish generation in the box.
-                </p>
-                <p>
-                  Bring the cable indoors through a sealed penetration with a drip loop. Keep it
-                  away from the hardline&apos;s point of entry so one accident cannot cut both.
-                </p>
-                <p>
-                  Power the dish from a circuit that stays on, ideally the same UPS as the modem
-                  and gateway, so a brief power blip does not take out the backup you were counting
-                  on.
-                </p>
+              <FlowBox step={2} label="Mount the dish" sublabel="Roof, pole or ground mount" icon={<DishGlyph size={18} />}>
+                <Do>Install the mount and the dish. Follow the Starlink instructions for the dish model.</Do>
+                <Do>Route the Starlink cable to the utility room.</Do>
+                <Do>Seal the hole where the cable enters the house.</Do>
+                <Do>Keep the Starlink cable away from the wired internet cable.</Do>
+                <Check>The cable reaches the utility room with slack to spare.</Check>
               </FlowBox>
             </FadeIn>
             <FadeIn className="w-full"><Arrow /></FadeIn>
 
             <FadeIn className="w-full">
-              <FlowBox step={3} label="Starlink router" sublabel="Create ScottBackup" icon={<RouterGlyph size={18} />}>
-                <p>
-                  Finish Starlink app setup. Name the Wi-Fi network <Mono>ScottBackup</Mono>, set a
-                  strong password, and store it in the owner&apos;s password manager.
-                </p>
-                <p>
-                  Place the Starlink router in the utility room within a few feet, and line of
-                  sight, of the Eero gateway. The gateway talks to it over Wi-Fi; distance costs
-                  speed.
-                </p>
-                <p className="text-white/85">
-                  Do not enable Bypass Mode and do not run an Ethernet cable from the Starlink
-                  router into the Eero. Eero&apos;s Internet Backup joins a Wi-Fi network; the
-                  ScottBackup Wi-Fi is the handoff.
-                </p>
+              <FlowBox step={3} label="Connect power" sublabel="Utility room" icon={<BoltGlyph size={18} />}>
+                <Do>Connect the Starlink cable to the Starlink router.</Do>
+                <Do>
+                  Plug the Starlink router into an outlet that is always on. If the modem is on a
+                  battery backup, use the same one.
+                </Do>
+                <Check>The Starlink app shows the dish is online.</Check>
               </FlowBox>
             </FadeIn>
             <FadeIn className="w-full"><Arrow /></FadeIn>
 
             <FadeIn className="w-full">
-              <FlowBox step={4} label="Eero app" sublabel="Settings → Internet Backup" icon={<MeshNodeGlyph size={18} />}>
-                <p>
-                  Internet Backup is an Eero Plus feature. Confirm the subscription is active on the
-                  owner&apos;s account before you start.
-                </p>
-                <p>
-                  In the Eero app: <Mono>Settings</Mono> → <Mono>Internet Backup</Mono> → turn it on →
-                  add a backup network → choose <Mono>ScottBackup</Mono> → enter the password → save.
-                </p>
-                <p>Leave Starlink service active for the test in the next step.</p>
+              <FlowBox step={4} label="Create the PerryBackup Wi-Fi" sublabel="Starlink app" icon={<RouterGlyph size={18} />}>
+                <Do>In the Starlink app, set the Wi-Fi name to <Name>PerryBackup</Name>.</Do>
+                <Do>Set a strong password. Give it to the owner.</Do>
+                <Do>
+                  Place the Starlink router within 10 feet of the Eero gateway, with nothing large
+                  between them.
+                </Do>
+                <Do warn>Do not turn on Bypass Mode.</Do>
+                <Do warn>Do not connect a network cable from the Starlink router to the Eero.</Do>
+                <Check>A phone can join the PerryBackup Wi-Fi and load a web page.</Check>
               </FlowBox>
             </FadeIn>
             <FadeIn className="w-full"><Arrow /></FadeIn>
 
             <FadeIn className="w-full">
-              <FlowBox step={5} label="Test the failover" sublabel="Pull the plug on purpose" variant="accent" icon={<BoltGlyph size={18} />}>
-                <p>
-                  Power down the modem or unplug its line from the street. Watch the Eero app: within
-                  about a minute it should report that it is connected through Internet Backup on
-                  ScottBackup.
-                </p>
-                <p>
-                  From any device already on ScottHome, load a page and run a speed test. Nobody
-                  should have to re-join Wi-Fi.
-                </p>
+              <FlowBox step={5} label="Set up the Eero" sublabel="Eero app" icon={<MeshNodeGlyph size={18} />}>
+                <Do>Confirm the Eero Plus subscription is active.</Do>
+                <Do>
+                  In the Eero app: <Name>Settings</Name> → <Name>Internet Backup</Name> → turn on →{" "}
+                  <Name>Add network</Name> → select <Name>PerryBackup</Name> → enter the password → Save.
+                </Do>
+                <Check>Internet Backup lists PerryBackup as ready.</Check>
+              </FlowBox>
+            </FadeIn>
+            <FadeIn className="w-full"><Arrow /></FadeIn>
+
+            <FadeIn className="w-full">
+              <FlowBox step={6} label="Test the failover" sublabel="Modem off" variant="accent" icon={<WifiGlyph size={18} />}>
+                <Do>Confirm Starlink service is on, not paused.</Do>
+                <Do>Unplug the modem power. Wait up to 2 minutes.</Do>
+                <Check>
+                  The Eero app says it is using Internet Backup. A phone on the PerryHome Wi-Fi loads
+                  a web page.
+                </Check>
               </FlowBox>
             </FadeIn>
             <FadeIn className="w-full">
-              <BranchArrows leftLabel="Passed" rightLabel="Not yet" />
+              <BranchArrows leftLabel="Pass" rightLabel="Fail" />
             </FadeIn>
 
             <FadeIn className="w-full">
               <div className="grid grid-cols-2 gap-4 md:gap-8 w-full items-start">
                 <div className="flex flex-col items-center">
-                  <FlowBox label="Continue" sublabel="On to restore" />
+                  <FlowBox label="Go to step 7" sublabel="Test passed" />
                 </div>
                 <div className="flex flex-col items-center">
-                  <GroupBox title="Troubleshoot">
-                    <ul className="space-y-2 text-[12px] md:text-[13px] text-white/70 leading-relaxed">
-                      <li className="flex gap-2"><Tick />Move the Starlink router closer to the gateway.</li>
-                      <li className="flex gap-2"><Tick />Re-enter the ScottBackup password in the Eero app.</li>
-                      <li className="flex gap-2"><Tick />Confirm Starlink service is not paused.</li>
-                      <li className="flex gap-2"><Tick />Confirm Eero Plus is active and the gateway is up to date.</li>
+                  <GroupBox title="If the test fails">
+                    <ul className="space-y-2 text-[12px] md:text-[13px] text-white/75 leading-relaxed">
+                      <li className="flex gap-2"><Tick />Move the Starlink router closer to the Eero gateway.</li>
+                      <li className="flex gap-2"><Tick />Enter the PerryBackup password again in the Eero app.</li>
+                      <li className="flex gap-2"><Tick />Confirm Starlink service is on.</li>
+                      <li className="flex gap-2"><Tick />Confirm Eero Plus is active.</li>
                     </ul>
                   </GroupBox>
-                  <ArrowUp />
+                  <ArrowUp label="Repeat step 6" />
                 </div>
               </div>
             </FadeIn>
             <FadeIn className="w-full"><Arrow /></FadeIn>
 
             <FadeIn className="w-full">
-              <FlowBox step={6} label="Restore & verify" sublabel="Confirm the way back" icon={<CableGlyph size={18} />}>
-                <p>
-                  Power the modem back up. Within a couple of minutes the Eero app should switch back
-                  to the primary connection on its own.
-                </p>
-                <p>
-                  Then pause Starlink service in the Starlink app. The dish stays powered; only the
-                  plan sleeps.
-                </p>
+              <FlowBox step={7} label="Restore" sublabel="Modem on" icon={<CableGlyph size={18} />}>
+                <Do>Plug the modem back in. Wait up to 3 minutes.</Do>
+                <Check>The Eero app says it is back on the main connection.</Check>
+                <Do>Then, in the Starlink app, pause Starlink service.</Do>
               </FlowBox>
             </FadeIn>
             <FadeIn className="w-full"><Arrow /></FadeIn>
 
             <FadeIn className="w-full">
-              <FlowBox step={7} label="Hand-off" sublabel="Leave it obvious" variant="accent" icon={<TagGlyph size={18} />}>
-                <p>
-                  Label the Starlink router and the dish power supply <Mono>SCOTTBACKUP · LEAVE ON</Mono>.
-                </p>
-                <p>
-                  Walk the owner through the two switches: Starlink app → Service (resume / pause)
-                  and Eero app → Internet Backup (stays on).
-                </p>
-                <p>
-                  Record the ScottBackup password, the Starlink account login, and the date of the
-                  successful test.
-                </p>
+              <FlowBox step={8} label="Hand over" sublabel="Owner" variant="accent" icon={<TagGlyph size={18} />}>
+                <Do>
+                  Put a label on the Starlink router and its power supply:{" "}
+                  <Name>PERRYBACKUP WI-FI – DO NOT UNPLUG</Name>.
+                </Do>
+                <Do>Show the owner the Service switch in the Starlink app.</Do>
+                <Do>Confirm the owner has the PerryBackup Wi-Fi password.</Do>
+                <Check>The owner can turn Starlink service on and off in the app.</Check>
               </FlowBox>
             </FadeIn>
           </div>
-        </section>
 
-        {/* ── Good to know ── */}
-        <section>
-          <FadeIn className="w-full">
-            <SectionHeader kicker="Good to know" title="Questions people ask" />
-          </FadeIn>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-10">
             <FadeIn className="w-full">
-              <Fact icon={<WifiGlyph size={18} />} q="Do devices have to reconnect?">
-                No. The switch happens one hop upstream of ScottHome. Devices stay where they are;
-                only the gateway&apos;s internet source changes.
-              </Fact>
+              <div className="h-full rounded-md border p-5" style={{ borderColor: `${RED}66`, background: "#0d2b18" }}>
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em]" style={{ color: RED }}>
+                  <CrossGlyph size={14} />
+                  Do not
+                </div>
+                <ul className="mt-3 space-y-2 text-[13px] text-white/80 leading-relaxed">
+                  <li className="flex gap-2"><Dash color={RED} />Do not change the PerryHome Wi-Fi.</li>
+                  <li className="flex gap-2"><Dash color={RED} />Do not turn on Bypass Mode on the Starlink router.</li>
+                  <li className="flex gap-2"><Dash color={RED} />Do not connect the Starlink router to the Eero with a cable.</li>
+                  <li className="flex gap-2"><Dash color={RED} />Do not power the dish from a switched outlet.</li>
+                </ul>
+              </div>
             </FadeIn>
             <FadeIn className="w-full">
-              <Fact icon={<RouterGlyph size={18} />} q="Why Wi-Fi between Starlink and the Eero, not a cable?">
-                Eero&apos;s Internet Backup is built around joining a backup Wi-Fi network: a hotspot, a
-                neighbor, or here, ScottBackup. Eero does not do dual-WAN over Ethernet, so the
-                Starlink router&apos;s Wi-Fi is the handoff.
-              </Fact>
-            </FadeIn>
-            <FadeIn className="w-full">
-              <Fact icon={<BoltGlyph size={18} />} q="Does the dish need to stay powered?">
-                Yes, leave it on. That keeps ScottBackup on the air so the gateway can switch at
-                once. A paused plan costs nothing while the dish idles. A smart plug is an option if
-                you accept a few minutes of boot time during an outage.
-              </Fact>
-            </FadeIn>
-            <FadeIn className="w-full">
-              <Fact icon={<SatelliteGlyph size={18} />} q="What will it feel like on backup?">
-                Comfortable. Satellite bandwidth handles video calls, streaming and work. Expect a
-                little more latency than fiber and some sensitivity to heavy weather.
-              </Fact>
-            </FadeIn>
-            <FadeIn className="w-full">
-              <Fact icon={<WrenchGlyph size={18} />} q="What does the setup require?">
-                An Eero Plus subscription (Internet Backup is a Plus feature), a Starlink kit on a
-                plan that can be paused and resumed from the app, and a mount with a clear view of
-                the sky.
-              </Fact>
-            </FadeIn>
-            <FadeIn className="w-full">
-              <Fact icon={<HouseGlyph size={18} />} q="How do I know which mode I'm in?">
-                The Eero app shows an Internet Backup banner and sends a notification when it
-                switches in either direction. The Starlink app shows whether service is active or
-                paused.
-              </Fact>
+              <div className="h-full rounded-md border border-[#1a4a2e] bg-[#0d2b18] p-5">
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#5b9bd5]">
+                  <CheckGlyph size={14} />
+                  Installation record
+                </div>
+                <dl className="mt-3 space-y-3 text-[13px]">
+                  <Field label="Test passed on" />
+                  <Field label="Installer" />
+                  <Field label="PerryBackup Wi-Fi password given to owner" box />
+                  <Field label="Starlink service paused after the test" box />
+                  <Field label="Label on router and power supply" box />
+                </dl>
+              </div>
             </FadeIn>
           </div>
         </section>
@@ -383,60 +352,151 @@ export default function StarlinkFailoverPage() {
 
 /* ── Local presentational pieces ── */
 
-function Mono({ children }: { children: ReactNode }) {
-  return (
-    <span className="font-mono text-[12px] text-[#a8d4ff] tracking-wide">{children}</span>
-  );
-}
+/** Same-page anchor shown as a shareable address, with a copy button. */
+function ShareLink({ path }: { path: string }) {
+  const [copied, setCopied] = useState(false);
+  const hash = path.slice(path.indexOf("#"));
+  const shown = `decourcy.com${path}`;
 
-function Tick() {
-  return (
-    <span className="shrink-0 mt-[5px] w-2 h-2 rounded-sm border border-[#5b9bd5]/60" aria-hidden />
-  );
-}
+  const copy = async () => {
+    const full = `${window.location.origin}${path}`;
+    try {
+      await navigator.clipboard.writeText(full);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      window.prompt("Copy this link", full);
+    }
+  };
 
-function LayerCard({
-  icon,
-  tag,
-  title,
-  accent,
-  children,
-}: {
-  icon: ReactNode;
-  tag: string;
-  title: string;
-  accent: string;
-  children: ReactNode;
-}) {
   return (
-    <div className="h-full rounded-md border border-[#1a4a2e] bg-[#0d2b18] p-5 flex flex-col">
-      <div className="flex items-center justify-between">
-        <div
-          className="w-10 h-10 rounded border bg-[#071a0e] flex items-center justify-center"
-          style={{ color: accent, borderColor: `${accent}55` }}
+    <div className="-mt-3 mb-10 flex justify-center">
+      <div className="inline-flex max-w-full items-stretch rounded border border-[#5b9bd5]/40 bg-[#071a0e] overflow-hidden text-[11px] md:text-[12px]">
+        <a
+          href={hash}
+          className="flex min-w-0 items-center gap-2 px-3 py-2 font-mono text-[#a8d4ff] tracking-wide hover:bg-[#0d2b18] transition-colors"
+          title="Link to this section"
         >
-          {icon}
-        </div>
-        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/35">{tag}</span>
+          <LinkGlyph size={14} className="shrink-0 text-[#5b9bd5]" />
+          <span className="truncate">{shown}</span>
+        </a>
+        <button
+          type="button"
+          onClick={() => void copy()}
+          className="px-3 py-2 border-l border-[#5b9bd5]/40 font-bold uppercase tracking-[0.18em] text-[10px] text-[#5b9bd5] hover:bg-[#0d2b18] hover:text-[#a8d4ff] transition-colors whitespace-nowrap"
+          aria-live="polite"
+        >
+          {copied ? "Copied" : "Copy link"}
+        </button>
       </div>
-      <h3 className="mt-4 text-base font-bold uppercase tracking-wide" style={{ color: accent }}>
-        {title}
-      </h3>
-      <p className="mt-2 text-[13px] text-white/65 leading-relaxed">{children}</p>
     </div>
   );
 }
 
-function PlayCard({
+function NetworkCard({
+  name,
+  kind,
+  color,
+  children,
+}: {
+  name: string;
+  kind: string;
+  color: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="rounded-md border bg-[#0d2b18] p-4 flex gap-3" style={{ borderColor: `${color}66` }}>
+      <div
+        className="shrink-0 w-10 h-10 rounded border bg-[#071a0e] flex items-center justify-center"
+        style={{ color, borderColor: `${color}66` }}
+      >
+        <WifiGlyph size={20} />
+      </div>
+      <div className="min-w-0">
+        <div className="text-[9px] font-bold uppercase tracking-[0.2em]" style={{ color }}>
+          Wi-Fi network · {kind}
+        </div>
+        <div className="mt-0.5 text-base md:text-lg font-bold text-white leading-tight">{name}</div>
+        <p className="mt-1 text-[13px] text-white/70 leading-snug">{children}</p>
+      </div>
+    </div>
+  );
+}
+
+function Term({ icon, word, children }: { icon: ReactNode; word: string; children: ReactNode }) {
+  return (
+    <div className="flex items-start gap-2">
+      <span className="shrink-0 mt-[1px] text-[#5b9bd5]">{icon}</span>
+      <p>
+        <b className="text-white font-bold">{word}</b>
+        <span className="text-white/35"> · </span>
+        {children}
+      </p>
+    </div>
+  );
+}
+
+function ActionRow({ state, color, children }: { state: string; color: string; children: ReactNode }) {
+  return (
+    <div className="rounded-md border border-[#1a4a2e] bg-[#0d2b18] p-4 flex items-center gap-4">
+      <span
+        className="shrink-0 w-14 h-9 rounded-full border flex items-center justify-center text-[12px] font-bold uppercase tracking-[0.18em]"
+        style={{ color, borderColor: `${color}88`, background: "#071a0e", boxShadow: `0 0 14px ${color}33` }}
+      >
+        {state}
+      </span>
+      <p className="text-[14px] md:text-[15px] text-white/80 leading-snug">{children}</p>
+    </div>
+  );
+}
+
+function Name({ children }: { children: ReactNode }) {
+  return <span className="font-mono text-[12px] text-[#a8d4ff] tracking-wide">{children}</span>;
+}
+
+function Tick() {
+  return <span className="shrink-0 mt-[5px] w-2 h-2 rounded-sm border border-[#5b9bd5]/60" aria-hidden />;
+}
+
+function Dash({ color }: { color: string }) {
+  return <span className="shrink-0 mt-[9px] w-2 h-px" style={{ background: color }} aria-hidden />;
+}
+
+function Do({ children, warn = false }: { children: ReactNode; warn?: boolean }) {
+  return (
+    <p className={`flex gap-2.5 ${warn ? "text-white/90" : ""}`}>
+      <span
+        className="shrink-0 mt-[7px] w-1.5 h-1.5 rounded-full"
+        style={{ background: warn ? RED : BLUE }}
+        aria-hidden
+      />
+      <span>{children}</span>
+    </p>
+  );
+}
+
+function Check({ children }: { children: ReactNode }) {
+  return (
+    <p className="flex gap-2.5 rounded border border-[#5b9bd5]/30 bg-[#071a0e] px-3 py-2 text-white/85">
+      <CheckGlyph size={16} className="shrink-0 mt-0.5 text-[#5b9bd5]" />
+      <span>
+        <span className="font-bold uppercase tracking-wider text-[11px] text-[#5b9bd5] mr-1.5">Check</span>
+        {children}
+      </span>
+    </p>
+  );
+}
+
+function StepCard({
   n,
-  icon,
   title,
-  accent = "#5b9bd5",
+  icon,
+  accent = BLUE,
   children,
 }: {
   n: string;
-  icon: ReactNode;
   title: string;
+  icon: ReactNode;
   accent?: string;
   children: ReactNode;
 }) {
@@ -444,27 +504,53 @@ function PlayCard({
     <div className="h-full rounded-md border border-[#1a4a2e] bg-[#0d2b18] p-5">
       <div className="flex items-center gap-3">
         <span
-          className="w-8 h-8 rounded-full border bg-[#071a0e] flex items-center justify-center text-[12px] font-bold"
+          className="w-9 h-9 rounded-full border bg-[#071a0e] flex items-center justify-center text-[13px] font-bold"
           style={{ color: accent, borderColor: `${accent}77` }}
         >
           {n}
         </span>
         <span style={{ color: accent }}>{icon}</span>
-        <h3 className="text-sm font-bold uppercase tracking-wide text-white/90">{title}</h3>
+        <h3 className="text-sm md:text-base font-bold uppercase tracking-wide text-white/90">{title}</h3>
       </div>
-      <p className="mt-3 text-[13px] text-white/65 leading-relaxed">{children}</p>
+      <p className="mt-3 text-[15px] md:text-base text-white/80 leading-snug">{children}</p>
     </div>
   );
 }
 
-function Fact({ icon, q, children }: { icon: ReactNode; q: ReactNode; children: ReactNode }) {
+function Tile({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
   return (
     <div className="h-full rounded-md border border-[#1a4a2e] bg-[#0d2b18] p-5">
       <div className="flex items-start gap-3">
         <span className="shrink-0 mt-0.5 text-[#5b9bd5]">{icon}</span>
-        <h3 className="text-[12px] md:text-[13px] font-bold uppercase tracking-wider text-white/90 leading-snug">{q}</h3>
+        <h3 className="text-[13px] md:text-sm font-bold uppercase tracking-wider text-white/90 leading-snug">{title}</h3>
       </div>
-      <p className="mt-3 text-[13px] text-white/65 leading-relaxed">{children}</p>
+      <p className="mt-3 text-[14px] text-white/75 leading-snug">{children}</p>
+    </div>
+  );
+}
+
+function ListCard({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="h-full rounded-md border border-[#1a4a2e] bg-[#0d2b18] p-5">
+      <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#5b9bd5]">{title}</div>
+      <ul className="mt-3 space-y-2 text-[13px] text-white/80 leading-relaxed [&>li]:flex [&>li]:gap-2 [&>li]:before:content-[''] [&>li]:before:shrink-0 [&>li]:before:mt-[8px] [&>li]:before:w-1.5 [&>li]:before:h-1.5 [&>li]:before:rounded-full [&>li]:before:bg-[#5b9bd5]">
+        {children}
+      </ul>
+    </div>
+  );
+}
+
+function Field({ label, box = false }: { label: string; box?: boolean }) {
+  return (
+    <div className="flex items-end gap-3">
+      <dt className="text-white/70">{label}</dt>
+      <dd className="flex-1 min-w-0 flex justify-end">
+        {box ? (
+          <span className="w-5 h-5 rounded-sm border border-[#5b9bd5]/60" aria-label="checkbox" />
+        ) : (
+          <span className="w-full border-b border-dashed border-[#5b9bd5]/40 h-4" aria-hidden />
+        )}
+      </dd>
     </div>
   );
 }
