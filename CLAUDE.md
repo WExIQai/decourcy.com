@@ -52,6 +52,19 @@ Most content will be workflow and process visualizations. Follow these rules:
 - Consistent spacing and alignment across all workflow elements
 - Automatically update this style guide when new patterns are established during iteration
 
+## Interactive State Diagrams (e.g. `/StarlinkFailover`)
+
+Pages that explain a system with two or more operating states (normal vs. backup, on vs. off) use a slider-driven scene rather than static before/after images:
+
+- **Scene**: one inline SVG (viewBox ~600 wide, near-square so it fills a phone screen) drawn from palette primitives: house/room shells in `#0d2b18` / `#0a2314`, walls `#1a4a2e`, equipment boxes `#143d24`. Inputs enter on the left, distribution fans out to the right. Keep in-SVG labels short, all caps, bold, `letterSpacing` 1–1.5, and ≥10px in viewBox units; put the full legend/readout in HTML beside the diagram so it stays legible on mobile
+- **State value**: a continuous `t` (0→1). Everything that differs between states cross-fades on `t` (group `opacity={t}` / `opacity={1 - t}`); everything that stays constant (the mesh, the devices) is drawn once. The slider is a native `<input type="range">` styled via `.sf-range` (transparent track, 30px glowing thumb, 44px touch target) laid over a custom track; `t` is continuous while dragging and snap-animates to the nearest state on release (rAF + ease-in-out, no CSS transitions on the SVG groups). Tappable state labels sit at each end, and a "run drill" button plays the transition automatically
+- **Motion in connections**: flowing dashes with `stroke-dasharray` + a `stroke-dashoffset` keyframe (`.sf-flow`, direction follows path direction) plus a few "packet" circles on SMIL `<animateMotion>` along the same path. Expanding `.sf-ring` circles for active radios, `.sf-breathe` for status lights, gentle `.sf-drift` for the satellite. All motion is disabled under `prefers-reduced-motion`
+- **Line colors**: wired and mesh paths use the accent blue `#5b9bd5`; radio/satellite paths use a lighter sky blue `#a8d4ff` so the two sources read differently. A muted red `#e0605a` is reserved for fault states (a break glyph, an outage label, a flickering LED) and is used sparingly; a muted amber `#e6c36a` marks transitional "searching" states in status consoles
+- **Status console**: a monospace readout beside the scene (row per subsystem: pulsing dot, name, state word) plus a one-line "data path" string, so the scene is never the only carrier of meaning
+- **Timeline scrubber**: a second `.sf-range` stepping through discrete events (min/max/step) with step pips, a `T + …` clock in mono, an "Automatic / You" chip, and a mini console that changes per step
+- **In-app switch mock-ups**: glyph-only phone frames with an accessible `role="switch"` toggle, used to show what the owner actually taps; never screenshots of real apps
+- **Section header**: kicker (10–11px, tracking 0.28em, blue), short blue rule, all-caps bold title, optional one-sentence blurb
+
 ## Retro Game / Terminal Pages
 
 Interactive game pages (e.g. `/EscapeFromParis`, `/Zork`) use a CRT terminal treatment layered on the site palette:

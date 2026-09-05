@@ -11,6 +11,7 @@ const CANONICAL_ROUTES = [
   "GmailCleaner",
   "LeadStarLeaders",
   "QuestForRetirement",
+  "StarlinkFailover",
   "TheLaundromatTrail",
   "amerilife-marketing-strategy",
   "ca47media",
