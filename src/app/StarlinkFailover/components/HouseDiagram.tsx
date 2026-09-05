@@ -229,7 +229,7 @@ export function HouseDiagram({ t }: { t: number }) {
         <line x1="103" y1="466" x2="118" y2="466" stroke={SKY} strokeOpacity="0.5" />
         <line x1="103" y1="471" x2="118" y2="471" stroke={SKY} strokeOpacity="0.5" />
         <line x1="103" y1="476" x2="118" y2="476" stroke={SKY} strokeOpacity="0.5" />
-        <text x="106" y="500" textAnchor="middle" fontSize="10" fontWeight={700} fill={SKY} opacity={0.55 + 0.45 * b} letterSpacing="1">SCOTTBACKUP</text>
+        <text x="106" y="452" textAnchor="middle" fontSize="9" fontWeight={700} fill={SKY} opacity={0.6 + 0.4 * b} letterSpacing="1">SCOTTBACKUP WI-FI</text>
       </g>
       {/* Modem */}
       <g>
@@ -265,8 +265,8 @@ export function HouseDiagram({ t }: { t: number }) {
         <path d={P_HOP} fill="none" stroke={SKY} strokeWidth="1.6" className="sf-flow" />
         <Packets path={P_HOP} count={2} dur={1.4} color={SKY} r={2.8} />
         <g stroke={SKY} strokeWidth="1.3" fill="none" strokeLinecap="round" className="sf-breathe">
-          <path d="M138 446 a 8 8 0 0 1 14 0" />
-          <path d="M134 441 a 14 14 0 0 1 22 0" />
+          <path d="M138 438 a 8 8 0 0 1 14 0" />
+          <path d="M134 433 a 14 14 0 0 1 22 0" />
         </g>
       </g>
 
@@ -319,9 +319,9 @@ export function HouseDiagram({ t }: { t: number }) {
 
       {/* network name badge */}
       <g transform="translate(300 585)">
-        <rect x="-70" y="-13" width="140" height="26" rx="4" fill="#071a0e" stroke={BLUE} strokeOpacity="0.5" />
-        <circle cx="-54" cy="0" r="3" fill={BLUE} className="sf-breathe" />
-        <text x="6" y="4.5" textAnchor="middle" fontSize="12" fontWeight={700} fill="#fff" opacity="0.9" letterSpacing="1.6">SCOTTHOME</text>
+        <rect x="-84" y="-13" width="168" height="26" rx="4" fill="#071a0e" stroke={BLUE} strokeOpacity="0.5" />
+        <circle cx="-68" cy="0" r="3" fill={BLUE} className="sf-breathe" />
+        <text x="6" y="4.5" textAnchor="middle" fontSize="12" fontWeight={700} fill="#fff" opacity="0.9" letterSpacing="1.6">SCOTTHOME WI-FI</text>
       </g>
     </svg>
   );

@@ -191,11 +191,11 @@ export function FailoverSimulator() {
           />
           <StatusRow
             label="Starlink"
-            sub="Backup · ScottBackup"
+            sub="ScottBackup Wi-Fi"
             state={backup ? "up-sky" : "idle"}
             text={backup ? "ON" : "PAUSED"}
           />
-          <StatusRow label="Home Wi-Fi" sub="ScottHome · 4 Eero nodes" state="up" text="ALL DEVICES CONNECTED" last />
+          <StatusRow label="ScottHome Wi-Fi" sub="Everyday Wi-Fi · Eero" state="up" text="ALL DEVICES CONNECTED" last />
 
           <div className="mt-4 pt-3 border-t border-[#1a4a2e]">
             <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/35 mb-1.5 font-sans">Internet source</div>
@@ -206,8 +206,8 @@ export function FailoverSimulator() {
         </div>
 
         <p className="text-[12px] leading-relaxed text-white/55 px-1">
-          All phones, laptops and TVs stay on <span className="text-white/85 font-semibold">ScottHome</span>. Only the
-          internet source changes.
+          Phones, laptops and TVs stay on the <span className="text-white/85 font-semibold">ScottHome Wi-Fi</span> the
+          whole time. Only the internet source changes.
         </p>
       </div>
     </div>
