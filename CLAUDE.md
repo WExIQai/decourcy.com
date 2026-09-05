@@ -61,9 +61,18 @@ Pages that explain a system with two or more operating states (normal vs. backup
 - **Motion in connections**: flowing dashes with `stroke-dasharray` + a `stroke-dashoffset` keyframe (`.sf-flow`, direction follows path direction) plus a few "packet" circles on SMIL `<animateMotion>` along the same path. Expanding `.sf-ring` circles for active radios, `.sf-breathe` for status lights, gentle `.sf-drift` for the satellite. All motion is disabled under `prefers-reduced-motion`
 - **Line colors**: wired and mesh paths use the accent blue `#5b9bd5`; radio/satellite paths use a lighter sky blue `#a8d4ff` so the two sources read differently. A muted red `#e0605a` is reserved for fault states (a break glyph, an outage label, a flickering LED) and is used sparingly; a muted amber `#e6c36a` marks transitional "searching" states in status consoles
 - **Status console**: a monospace readout beside the scene (row per subsystem: pulsing dot, name, state word) plus a one-line "data path" string, so the scene is never the only carrier of meaning
-- **Timeline scrubber**: a second `.sf-range` stepping through discrete events (min/max/step) with step pips, a `T + …` clock in mono, an "Automatic / You" chip, and a mini console that changes per step
 - **In-app switch mock-ups**: glyph-only phone frames with an accessible `role="switch"` toggle, used to show what the owner actually taps; never screenshots of real apps
 - **Section header**: kicker (10–11px, tracking 0.28em, blue), short blue rule, all-caps bold title, optional one-sentence blurb
+
+## Writing for Executive Readers
+
+Pages aimed at a board- or CEO-level reader (e.g. `/StarlinkFailover`) use Simplified Technical English and assume little curiosity:
+
+- One idea per sentence, under about 15 words, active voice, present tense. No idioms, no metaphors ("goes dark"), no jargon without a plain-word substitute (say "wired internet", not "hardline" or "WAN")
+- Lead with what it means for the reader, not how it works. A three-sentence lead paragraph at `text-base`/`text-lg`, then the interactive scene, then at most three or four short sections
+- Use the same name for the same thing every time (the dish, the Starlink router, the Eero gateway, ScottHome, ScottBackup). Network and menu names render in mono sky-blue via a `Name` span
+- Procedures are numbered steps in the flow-diagram format. Each step is a list of imperative "do" lines (blue dot; red dot for "Do not …") and ends with a **Check** row: the observable condition that must be true before the next step. Follow the flow with a "Do not" card (red border) and an "Installation record" card (sign-off fields)
+- Cut anything that only satisfies curiosity: timelines, FAQs, layered explanations, second mock-ups. If a fact drives a decision (cost posture, subscription requirement), it earns a requirements tile; otherwise it goes
 
 ## Retro Game / Terminal Pages
 

@@ -114,8 +114,8 @@ export function HouseDiagram({ t }: { t: number }) {
       role="img"
       aria-label={
         backupOn
-          ? "House diagram in backup operation: the hardline is down, the Starlink dish is receiving from a satellite and feeding the Eero gateway over the ScottBackup Wi-Fi network. All four Eero nodes and every device stay connected to ScottHome."
-          : "House diagram in normal operation: the hardline feeds the modem and the Eero gateway, which distributes internet to three more Eero nodes and every device on ScottHome. Starlink is on standby."
+          ? "House diagram in backup operation: the wired internet is down. The Starlink dish receives from a satellite and feeds the Eero gateway over the ScottBackup Wi-Fi network. All four Eero nodes and every device stay connected to ScottHome."
+          : "House diagram in normal operation: the wired internet feeds the modem and the Eero gateway, which distributes internet to three more Eero nodes and every device on ScottHome. Starlink is paused."
       }
     >
       <defs>
@@ -143,7 +143,7 @@ export function HouseDiagram({ t }: { t: number }) {
       ))}
       <rect x="0" y="560" width="600" height="80" fill="#04120a" />
       <line x1="0" y1="560" x2="600" y2="560" stroke={WALL} strokeWidth="2" />
-      <text x="28" y="618" fontSize="13" fontWeight={700} fill="#fff" opacity="0.45" letterSpacing="1.5">ISP</text>
+      <text x="14" y="618" fontSize="12" fontWeight={700} fill="#fff" opacity="0.45" letterSpacing="1.5">STREET</text>
 
       {/* ── Satellite ── */}
       <g className="sf-drift">
@@ -169,9 +169,9 @@ export function HouseDiagram({ t }: { t: number }) {
         </g>
         {/* standby / active tag at mid-beam */}
         <g transform="translate(280 98)">
-          <rect x="-42" y="-11" width="84" height="22" rx="4" fill="#071a0e" stroke={backupOn ? SKY : BLUE} strokeOpacity={backupOn ? 0.7 : 0.3} />
+          <rect x="-52" y="-11" width="104" height="22" rx="4" fill="#071a0e" stroke={backupOn ? SKY : BLUE} strokeOpacity={backupOn ? 0.7 : 0.3} />
           <text textAnchor="middle" y="4.5" fontSize="11" fontWeight={700} letterSpacing="1.5" fill={backupOn ? SKY : "#fff"} opacity={backupOn ? 1 : 0.5}>
-            {backupOn ? "SAT LINK ACTIVE" : "SAT STANDBY"}
+            {backupOn ? "STARLINK ON" : "STARLINK PAUSED"}
           </text>
         </g>
       </g>
@@ -257,7 +257,7 @@ export function HouseDiagram({ t }: { t: number }) {
           <circle r="11" fill="#071a0e" stroke={RED} strokeWidth="1.4" />
           <path d="M-4.5 -4.5 4.5 4.5M4.5 -4.5 -4.5 4.5" stroke={RED} strokeWidth="2" strokeLinecap="round" />
         </g>
-        <text x="72" y="614" fontSize="11" fontWeight={700} fill={RED} letterSpacing="1.5" className="sf-flicker">HARDLINE OUTAGE</text>
+        <text x="72" y="614" fontSize="11" fontWeight={700} fill={RED} letterSpacing="1.5" className="sf-flicker">WIRED INTERNET DOWN</text>
       </g>
 
       {/* ── Backup hop: Starlink router →(Wi-Fi)→ Eero gateway ── */}
