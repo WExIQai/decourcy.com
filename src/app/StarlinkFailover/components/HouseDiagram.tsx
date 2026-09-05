@@ -4,7 +4,7 @@
   Animated cross-section of the house.
   `t` runs 0 → 1:  0 = NORMAL OPERATION (hardline), 1 = BACKUP OPERATION (Starlink).
   Everything that differs between states cross-fades on `t`; the mesh itself
-  (ScottHome) never changes — that is the point of the diagram.
+  (PerryHome) never changes — that is the point of the diagram.
 
   ViewBox 600 × 640. Inputs live on the LEFT (street conduit + dish cable), the
   Eero gateway sits in the utility room, and the mesh fans out to the right.
@@ -114,8 +114,8 @@ export function HouseDiagram({ t }: { t: number }) {
       role="img"
       aria-label={
         backupOn
-          ? "House diagram in backup operation: the wired internet is down. The Starlink dish receives from a satellite and feeds the Eero gateway over the ScottBackup Wi-Fi network. All four Eero nodes and every device stay connected to ScottHome."
-          : "House diagram in normal operation: the wired internet feeds the modem and the Eero gateway, which distributes internet to three more Eero nodes and every device on ScottHome. Starlink is paused."
+          ? "House diagram in backup operation: the wired internet is down. The Starlink dish receives from a satellite and feeds the Eero gateway over the PerryBackup Wi-Fi network. All Eero nodes and every device stay connected to the PerryHome Wi-Fi."
+          : "House diagram in normal operation: the wired internet feeds the modem and the Eero gateway, which distributes internet to three more Eero nodes and every device on PerryHome. Starlink is paused."
       }
     >
       <defs>
@@ -229,7 +229,7 @@ export function HouseDiagram({ t }: { t: number }) {
         <line x1="103" y1="466" x2="118" y2="466" stroke={SKY} strokeOpacity="0.5" />
         <line x1="103" y1="471" x2="118" y2="471" stroke={SKY} strokeOpacity="0.5" />
         <line x1="103" y1="476" x2="118" y2="476" stroke={SKY} strokeOpacity="0.5" />
-        <text x="106" y="452" textAnchor="middle" fontSize="9" fontWeight={700} fill={SKY} opacity={0.6 + 0.4 * b} letterSpacing="1">SCOTTBACKUP WI-FI</text>
+        <text x="106" y="452" textAnchor="middle" fontSize="9" fontWeight={700} fill={SKY} opacity={0.6 + 0.4 * b} letterSpacing="1">PERRYBACKUP WI-FI</text>
       </g>
       {/* Modem */}
       <g>
@@ -321,7 +321,7 @@ export function HouseDiagram({ t }: { t: number }) {
       <g transform="translate(300 585)">
         <rect x="-84" y="-13" width="168" height="26" rx="4" fill="#071a0e" stroke={BLUE} strokeOpacity="0.5" />
         <circle cx="-68" cy="0" r="3" fill={BLUE} className="sf-breathe" />
-        <text x="6" y="4.5" textAnchor="middle" fontSize="12" fontWeight={700} fill="#fff" opacity="0.9" letterSpacing="1.6">SCOTTHOME WI-FI</text>
+        <text x="6" y="4.5" textAnchor="middle" fontSize="12" fontWeight={700} fill="#fff" opacity="0.9" letterSpacing="1.6">PERRYHOME WI-FI</text>
       </g>
     </svg>
   );
