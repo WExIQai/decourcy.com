@@ -48,7 +48,7 @@ export default function StarlinkFailoverPage() {
               Every phone, laptop and TV uses it. It never changes.
             </NetworkCard>
             <NetworkCard name="PerryBackup" kind="Starlink Wi-Fi" color={SKY}>
-              The backup. The house uses it only while the wire is down.
+              The backup. The house uses it only while the wired internet is down.
             </NetworkCard>
           </div>
 
@@ -59,8 +59,8 @@ export default function StarlinkFailoverPage() {
               Wi-Fi network that covers the whole house. This is called a mesh network.
             </Term>
             <Term icon={<SatelliteGlyph size={16} />} word="Starlink">
-              Satellite internet. A dish on the roof talks to satellites in space. It does not use
-              the wire.
+              Satellite internet. A dish on the roof talks to satellites in space. It is a second,
+              separate way for the house to reach the internet.
             </Term>
           </div>
 
@@ -90,16 +90,16 @@ export default function StarlinkFailoverPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FadeIn className="w-full">
               <StepCard n="1" title="Normal" icon={<CableGlyph size={20} />}>
-                Internet comes through the wire. Starlink is paused.
+                The wired internet is working. Starlink is paused.
               </StepCard>
             </FadeIn>
             <FadeIn className="w-full">
-              <StepCard n="2" title="The wire fails" icon={<DishGlyph size={20} />} accent={SKY}>
+              <StepCard n="2" title="The wired internet fails" icon={<DishGlyph size={20} />} accent={SKY}>
                 The house switches to Starlink by itself.
               </StepCard>
             </FadeIn>
             <FadeIn className="w-full">
-              <StepCard n="3" title="The wire is back" icon={<CheckGlyph size={20} />}>
+              <StepCard n="3" title="The wired internet is back" icon={<CheckGlyph size={20} />}>
                 The house switches back by itself.
               </StepCard>
             </FadeIn>
@@ -119,7 +119,7 @@ export default function StarlinkFailoverPage() {
             </FadeIn>
             <FadeIn className="w-full">
               <ActionRow state="Off" color={BLUE}>
-                The Eero app says the wire is back. Turn <b className="text-white">Service</b> off.
+                The Eero app says the wired internet is back. Turn <b className="text-white">Service</b> off.
               </ActionRow>
             </FadeIn>
             <FadeIn className="w-full">
@@ -137,8 +137,10 @@ export default function StarlinkFailoverPage() {
           </FadeIn>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FadeIn className="w-full">
-              <Tile icon={<MeshNodeGlyph size={20} />} title="Eero Plus">
-                A subscription. It includes the automatic switch.
+              <Tile icon={<MeshNodeGlyph size={20} />} title="Eero mesh + Eero Plus">
+                The Eero Wi-Fi system and its Eero Plus subscription, which includes the automatic
+                switch. If the house has no Eero yet, the installer adds one and keeps the existing
+                Wi-Fi name.
               </Tile>
             </FadeIn>
             <FadeIn className="w-full">
@@ -168,6 +170,7 @@ export default function StarlinkFailoverPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
             <FadeIn className="w-full">
               <ListCard title="Equipment">
+                <li>Eero mesh system, if the house does not have one</li>
                 <li>Starlink kit: dish, cable, router, power supply</li>
                 <li>Mount for the roof type</li>
                 <li>Phone with the Starlink app, signed in to the owner&apos;s Starlink account</li>
@@ -182,10 +185,10 @@ export default function StarlinkFailoverPage() {
                   start, and use the real names.
                 </li>
                 <li>
-                  <span><Name>PerryHome</Name> is the everyday Wi-Fi network (Eero). It exists. Do not change it.</span>
+                  <span><Name>PerryHome</Name> is the everyday Wi-Fi network. It exists already. Keep its name and password, even if you add an Eero.</span>
                 </li>
                 <li>
-                  <span><Name>PerryBackup</Name> is the Starlink Wi-Fi network. You create it in step 4.</span>
+                  <span><Name>PerryBackup</Name> is the Starlink Wi-Fi network. You create it in step 5.</span>
                 </li>
                 <li>
                   <span><Name>Eero gateway</Name> is Eero unit 1, the one connected to the modem.</span>
@@ -199,7 +202,22 @@ export default function StarlinkFailoverPage() {
 
           <div className="w-full max-w-2xl mx-auto pl-10 md:pl-12 pr-1 flex flex-col items-center">
             <FadeIn className="w-full">
-              <FlowBox step={1} label="Check the sky" sublabel="Starlink app" icon={<EyeGlyph size={18} />}>
+              <FlowBox step={1} label="Add the Eero" sublabel="Only if the house has no Eero yet" icon={<MeshNodeGlyph size={18} />}>
+                <Do>If an Eero mesh is already in place, go to step 2.</Do>
+                <Do>Turn off the Wi-Fi on the existing router. If it is a modem-router, turn off its Wi-Fi or put it in bridge mode.</Do>
+                <Do>Set up the Eero with the Eero app. Connect Eero unit 1 to the modem. This is the Eero gateway.</Do>
+                <Do>
+                  Give the Eero the existing Wi-Fi name and password: <Name>PerryHome</Name>. Do not pick a
+                  new name.
+                </Do>
+                <Do>Place the other Eero units around the house.</Do>
+                <Check>Phones, laptops and TVs reconnect on their own. Nobody changes anything on a device.</Check>
+              </FlowBox>
+            </FadeIn>
+            <FadeIn className="w-full"><Arrow /></FadeIn>
+
+            <FadeIn className="w-full">
+              <FlowBox step={2} label="Check the sky" sublabel="Starlink app" icon={<EyeGlyph size={18} />}>
                 <Do>Go to the planned dish location.</Do>
                 <Do>In the Starlink app, run <Name>Check for obstructions</Name>.</Do>
                 <Check>The app shows a clear view of the sky. If not, choose another location.</Check>
@@ -208,7 +226,7 @@ export default function StarlinkFailoverPage() {
             <FadeIn className="w-full"><Arrow /></FadeIn>
 
             <FadeIn className="w-full">
-              <FlowBox step={2} label="Mount the dish" sublabel="Roof, pole or ground mount" icon={<DishGlyph size={18} />}>
+              <FlowBox step={3} label="Mount the dish" sublabel="Roof, pole or ground mount" icon={<DishGlyph size={18} />}>
                 <Do>Install the mount and the dish. Follow the Starlink instructions for the dish model.</Do>
                 <Do>Route the Starlink cable to the utility room.</Do>
                 <Do>Seal the hole where the cable enters the house.</Do>
@@ -219,7 +237,7 @@ export default function StarlinkFailoverPage() {
             <FadeIn className="w-full"><Arrow /></FadeIn>
 
             <FadeIn className="w-full">
-              <FlowBox step={3} label="Connect power" sublabel="Utility room" icon={<BoltGlyph size={18} />}>
+              <FlowBox step={4} label="Connect power" sublabel="Utility room" icon={<BoltGlyph size={18} />}>
                 <Do>Connect the Starlink cable to the Starlink router.</Do>
                 <Do>
                   Plug the Starlink router into an outlet that is always on. If the modem is on a
@@ -231,7 +249,7 @@ export default function StarlinkFailoverPage() {
             <FadeIn className="w-full"><Arrow /></FadeIn>
 
             <FadeIn className="w-full">
-              <FlowBox step={4} label="Create the PerryBackup Wi-Fi" sublabel="Starlink app" icon={<RouterGlyph size={18} />}>
+              <FlowBox step={5} label="Create the PerryBackup Wi-Fi" sublabel="Starlink app" icon={<RouterGlyph size={18} />}>
                 <Do>In the Starlink app, set the Wi-Fi name to <Name>PerryBackup</Name>.</Do>
                 <Do>Set a strong password. Give it to the owner.</Do>
                 <Do>
@@ -246,7 +264,7 @@ export default function StarlinkFailoverPage() {
             <FadeIn className="w-full"><Arrow /></FadeIn>
 
             <FadeIn className="w-full">
-              <FlowBox step={5} label="Set up the Eero" sublabel="Eero app" icon={<MeshNodeGlyph size={18} />}>
+              <FlowBox step={6} label="Turn on Internet Backup" sublabel="Eero app" icon={<MeshNodeGlyph size={18} />}>
                 <Do>Confirm the Eero Plus subscription is active.</Do>
                 <Do>
                   In the Eero app: <Name>Settings</Name> → <Name>Internet Backup</Name> → turn on →{" "}
@@ -258,7 +276,7 @@ export default function StarlinkFailoverPage() {
             <FadeIn className="w-full"><Arrow /></FadeIn>
 
             <FadeIn className="w-full">
-              <FlowBox step={6} label="Test the failover" sublabel="Modem off" variant="accent" icon={<WifiGlyph size={18} />}>
+              <FlowBox step={7} label="Test the failover" sublabel="Modem off" variant="accent" icon={<WifiGlyph size={18} />}>
                 <Do>Confirm Starlink service is on, not paused.</Do>
                 <Do>Unplug the modem power. Wait up to 2 minutes.</Do>
                 <Check>
@@ -274,7 +292,7 @@ export default function StarlinkFailoverPage() {
             <FadeIn className="w-full">
               <div className="grid grid-cols-2 gap-4 md:gap-8 w-full items-start">
                 <div className="flex flex-col items-center">
-                  <FlowBox label="Go to step 7" sublabel="Test passed" />
+                  <FlowBox label="Go to step 8" sublabel="Test passed" />
                 </div>
                 <div className="flex flex-col items-center">
                   <GroupBox title="If the test fails">
@@ -285,14 +303,14 @@ export default function StarlinkFailoverPage() {
                       <li className="flex gap-2"><Tick />Confirm Eero Plus is active.</li>
                     </ul>
                   </GroupBox>
-                  <ArrowUp label="Repeat step 6" />
+                  <ArrowUp label="Repeat step 7" />
                 </div>
               </div>
             </FadeIn>
             <FadeIn className="w-full"><Arrow /></FadeIn>
 
             <FadeIn className="w-full">
-              <FlowBox step={7} label="Restore" sublabel="Modem on" icon={<CableGlyph size={18} />}>
+              <FlowBox step={8} label="Restore" sublabel="Modem on" icon={<CableGlyph size={18} />}>
                 <Do>Plug the modem back in. Wait up to 3 minutes.</Do>
                 <Check>The Eero app says it is back on the main connection.</Check>
                 <Do>Then, in the Starlink app, pause Starlink service.</Do>
@@ -301,7 +319,7 @@ export default function StarlinkFailoverPage() {
             <FadeIn className="w-full"><Arrow /></FadeIn>
 
             <FadeIn className="w-full">
-              <FlowBox step={8} label="Hand over" sublabel="Owner" variant="accent" icon={<TagGlyph size={18} />}>
+              <FlowBox step={9} label="Hand over" sublabel="Owner" variant="accent" icon={<TagGlyph size={18} />}>
                 <Do>
                   Put a label on the Starlink router and its power supply:{" "}
                   <Name>PERRYBACKUP WI-FI – DO NOT UNPLUG</Name>.
